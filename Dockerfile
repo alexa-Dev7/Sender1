@@ -1,15 +1,31 @@
-FROM debian:latest
+# Use an official Debian-based image  
+FROM debian:latest  
 
-RUN apt update && apt install -y build-essential cmake libssl-dev wget
+# Install required dependencies  
+RUN apt-get update && apt-get install -y \
+    g++ \
+    cmake \
+    make \
+    libssl-dev \
+    libcrypto++-dev \
+    libuv1-dev \
+    libwebsockets-dev \
+    pkg-config \
+    && rm -rf /var/lib/apt/lists/*  
 
-RUN wget https://github.com/uNetworking/uWebSockets/archive/refs/tags/v20.25.0.tar.gz \
-    && tar -xvzf v20.25.0.tar.gz && cd uWebSockets-20.25.0 \
-    && make && make install
+# Set working directory  
+WORKDIR /app  
 
-WORKDIR /app
+# Copy project files into container  
+COPY . .  
 
-COPY . .
+# Compile the C++ project  
+RUN g++ -std=c++17 -c storage.cpp -o storage.o  
+RUN g++ -std=c++17 -c encryption.cpp -o encryption.o  
+RUN g++ -std=c++17 main.cpp storage.o encryption.o -o chat_server -luWS -lssl -lcrypto  
 
-RUN g++ main.cpp storage.cpp encryption.cpp -o chat_server -luWS -lssl -lcrypto -std=c++17
+# Expose port  
+EXPOSE 8080  
 
-CMD ["./chat_server"]
+# Run the server  
+CMD ["./chat_server"]  
