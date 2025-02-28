@@ -2,7 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <json/json.h>
-#include "storage.h"
+#include "storage.cpp"
 
 using namespace std;
 
